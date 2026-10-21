@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5edda">
+  <title>Goblin Picnic Committee</title>
+  <style>
+    :root { color-scheme: light; --ink: #253528; --green: #315b3c; --paper: #fffdf6; --gold: #efc95b; --muted: #647264; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px 14px 32px; background: #f5edda; color: var(--ink); font: 16px/1.5 system-ui, sans-serif; }
+    .wrap { width: min(100%, 700px); margin: 0 auto; }
+    .back { display: inline-block; margin-bottom: 16px; color: var(--green); font-weight: 700; text-underline-offset: 3px; }
+    .card { padding: clamp(18px, 5vw, 34px); background: var(--paper); border: 2px solid #d8dfc8; border-radius: 22px; box-shadow: 0 8px 0 #d9d2bd; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 8vw, 2.7rem); line-height: 1.08; letter-spacing: -.04em; }
+    .tagline { margin: 9px 0 22px; color: var(--muted); }
+    .goblin { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 16px; background: #edf3e5; }
+    .face { flex: 0 0 auto; display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; background: #d5e6b9; font-size: 2rem; }
+    .goblin p { margin: 0; }
+    h2 { margin: 22px 0 8px; font-size: 1.18rem; }
+    .rules { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+    .rules li { padding: 9px 12px; border-radius: 10px; background: #f4f1e7; }
+    .scorebar { display: flex; justify-content: space-between; gap: 10px; margin: 18px 0 8px; font-weight: 800; }
+    .track { height: 12px; overflow: hidden; border-radius: 99px; background: #e5e2d6; }
+    .fill { width: 0; height: 100%; border-radius: inherit; background: var(--green); transition: width .2s ease; }
+    .prompt { min-height: 1.5em; margin: 14px 0 10px; font-weight: 700; }
+    .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    button { min-height: 48px; padding: 10px 12px; border: 2px solid var(--green); border-radius: 12px; background: white; color: var(--ink); font: inherit; font-weight: 750; cursor: pointer; touch-action: manipulation; }
+    button:hover:not(:disabled) { background: #edf3e5; transform: translateY(-1px); }
+    button:focus-visible, a:focus-visible { outline: 4px solid #d18a1e; outline-offset: 3px; }
+    button:disabled { opacity: .58; cursor: not-allowed; }
+    .choice-name { display: block; }
+    .trait { display: block; margin-top: 3px; color: var(--muted); font-size: .8rem; font-weight: 600; }
+    .feedback, .outcome { margin-top: 16px; padding: 13px 14px; border-radius: 12px; background: #fff4cb; }
+    .outcome { border: 2px solid var(--gold); font-weight: 700; }
+    .controls { margin-top: 18px; }
+    .primary { width: 100%; background: var(--green); color: white; }
+    .primary:hover { background: #254a30 !important; }
+    [hidden] { display: none !important; }
+    @media (max-width: 440px) { .choices { grid-template-columns: 1fr; } .choices button { text-align: left; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a class="back" href="https://ka-chowf1.github.io/Dumb-Little-Internet/">← Back to Dumb Little Internet</a>
+    <section class="card" aria-labelledby="title">
+      <h1 id="title">Goblin Picnic Committee</h1>
+      <p class="tagline">Pick snacks for a goblin with very specific lunch opinions.</p>
+      <div class="goblin"><div class="face" aria-hidden="true">👺</div><p><strong>Meet Gribble.</strong><br>Four bites. One coveted Golden Napkin. Please do not bring soup.</p></div>
+      <section id="game" aria-label="Picnic game">
+        <div id="rulesArea" hidden>
+          <h2>Gribble’s official snack rules</h2>
+          <ul class="rules">
+            <li><strong>Crunchy:</strong> +2 points. “A good snack should make a tiny racket.”</li>
+            <li><strong>Sweet:</strong> +1 point. “Dessert is a breakfast vegetable.”</li>
+            <li><strong>Muddy:</strong> −1 point. “I can taste the garden.”</li>
+            <li><strong>Anything else:</strong> 0 points. Gribble is thinking about beetles.</li>
+          </ul>
+        </div>
+        <div class="scorebar" aria-label="Game progress"><span id="turnLabel">Turn 0 of 4</span><span>Score: <span id="score">0</span></span></div>
+        <div class="track" role="progressbar" aria-label="Picnic turns completed" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"><div class="fill" id="fill"></div></div>
+        <p class="prompt" id="prompt">Ready to pack Gribble’s picnic?</p>
+        <div class="choices" id="choices" hidden>
+          <button type="button" data-points="2" data-trait="Crunchy"><span class="choice-name">Carrot Crunch</span><span class="trait">🥕 Crunchy</span></button>
+          <button type="button" data-points="1" data-trait="Sweet"><span class="choice-name">Honey Berry</span><span class="trait">🫐 Sweet</span></button>
+          <button type="button" data-points="-1" data-trait="Muddy"><span class="choice-name">Mud Pie</span><span class="trait">🥧 Muddy</span></button>
+          <button type="button" data-points="0" data-trait="Anything else"><span class="choice-name">Plain Cracker</span><span class="trait">🍘 Anything else • 0 points</span></button>
+        </div>
+        <div id="feedback" class="feedback" role="status" aria-live="polite" hidden></div>
+        <div id="outcome" class="outcome" role="status" aria-live="polite" hidden></div>
+        <div class="controls"><button class="primary" id="start" type="button">Start picnic</button><button class="primary" id="restart" type="button" hidden>Restart picnic</button></div>
+      </section>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const buttons = [...document.querySelectorAll('#choices button')];
+      const start = document.getElementById('start');
+      const restart = document.getElementById('restart');
+      const rules = document.getElementById('rulesArea');
+      const choices = document.getElementById('choices');
+      const prompt = document.getElementById('prompt');
+      const feedback = document.getElementById('feedback');
+      const outcome = document.getElementById('outcome');
+      const scoreEl = document.getElementById('score');
+      const turnEl = document.getElementById('turnLabel');
+      const fill = document.getElementById('fill');
+      const bar = document.querySelector('[role="progressbar"]');
+      let score = 0;
+      let turn = 0;
+      let active = false;
+
+      function reset() {
+        score = 0;
+        turn = 0;
+        active = false;
+        scoreEl.textContent = '0';
+        turnEl.textContent = 'Turn 0 of 4';
+        fill.style.width = '0%';
+        bar.setAttribute('aria-valuenow', '0');
+        rules.hidden = true;
+        choices.hidden = true;
+        feedback.hidden = true;
+        outcome.hidden = true;
+        prompt.textContent = 'Ready to pack Gribble’s picnic?';
+        buttons.forEach(button => button.disabled = false);
+        start.hidden = false;
+        restart.hidden = true;
+      }
+
+      function begin() {
+        reset();
+        active = true;
+        rules.hidden = false;
+        choices.hidden = false;
+        start.hidden = true;
+        restart.hidden = false;
+        prompt.textContent = 'Pick one snack for turn 1.';
+      }
+
+      buttons.forEach(button => button.addEventListener('click', () => {
+        if (!active || turn >= 4) return;
+        const points = Number(button.dataset.points);
+        const trait = button.dataset.trait;
+        score += points;
+        turn += 1;
+        scoreEl.textContent = String(score);
+        turnEl.textContent = `Turn ${turn} of 4`;
+        fill.style.width = `${turn * 25}%`;
+        bar.setAttribute('aria-valuenow', String(turn));
+        feedback.hidden = false;
+        const sign = points > 0 ? '+' : '';
+        feedback.textContent = `Gribble inspects your ${button.querySelector('.choice-name').textContent}: ${trait} means ${sign}${points} point${Math.abs(points) === 1 ? '' : 's'}. Current total: ${score}.`;
+        if (turn === 4) {
+          active = false;
+          buttons.forEach(choice => choice.disabled = true);
+          prompt.textContent = 'The picnic is packed. Gribble has made a decision.';
+          outcome.hidden = false;
+          outcome.textContent = score >= 5
+            ? `Golden Napkin awarded! ${score} points! Gribble declares you “Chief of Crunch” and immediately sits on the napkin.`
+            : `No Golden Napkin today: ${score} point${Math.abs(score) === 1 ? '' : 's'}. Gribble says, “A respectable picnic. I shall sulk into this basket.” You need 5 points.`;
+        } else {
+          prompt.textContent = `Pick one snack for turn ${turn + 1}.`;
+        }
+      }));
+
+      start.addEventListener('click', begin);
+      restart.addEventListener('click', begin);
+      reset();
+    })();
+  </script>
+</body>
+</html>
